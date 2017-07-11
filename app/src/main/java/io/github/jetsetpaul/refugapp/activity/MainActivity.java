@@ -2,44 +2,75 @@ package io.github.jetsetpaul.refugapp.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.widget.Toast;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.github.jetsetpaul.refugapp.R;
-import okhttp3.Interceptor;
-import okhttp3.Request;
-import okhttp3.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import io.github.jetsetpaul.refugapp.adapter.LocationsAdapter;
+import io.github.jetsetpaul.refugapp.model.Locale;
+import io.github.jetsetpaul.refugapp.model.LocationsResponse;
+import io.github.jetsetpaul.refugapp.rest.AirTableClient;
+import io.github.jetsetpaul.refugapp.rest.AirTableService;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
-    public static final String BASE_URL = "https://api.airtable.com/v0/appM5n8ocv9GexBFR/";
     private static final String API_KEY_HEADER = "Authorization: Bearer";
-    private static final String airTableApiKey = "keyn1HD5MV6hQCkkT";
+    private static final String AIR_TABLE_API_KEY = "keyn1HD5MV6hQCkkT";
+    private RecyclerView recyclerView;
+    private LocationsAdapter adapter;
+    private List<Locale> localeList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+
+        localeList = new ArrayList<>();
+        adapter = new LocationsAdapter(this, localeList);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter.notifyDataSetChanged();
+        loadJSON();
     }
-    Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build();
 
-    Interceptor provideHeaderInterceptor() {
-        return new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                Request request = chain.request().newBuilder()
-                        .addHeader(API_KEY_HEADER, airTableApiKey)
-                        .build();
+    private void loadJSON(){
 
-                return chain.proceed(request);
+        try{
+            if (AIR_TABLE_API_KEY.isEmpty()){
+                Toast.makeText(getApplicationContext(), "Please obtain API Key firstly from airtable.com", Toast.LENGTH_SHORT).show();
+                return;
             }
-        };
+
+            AirTableClient Client = new AirTableClient();
+            AirTableService apiService =
+                    Client.getClient().create(AirTableService.class);
+            Call<LocationsResponse> call = apiService.listLocations(AIR_TABLE_API_KEY);
+            call.enqueue(new Callback<LocationsResponse>() {
+                @Override
+                public void onResponse(Call<LocationsResponse> call, Response<LocationsResponse> response) {
+                    List<Locale> locations = response.body().getLocales();
+                    recyclerView.setAdapter(new LocationsAdapter(getApplicationContext(), locations));
+                    recyclerView.smoothScrollToPosition(0);
+                }
+
+                @Override
+                public void onFailure(Call<LocationsResponse> call, Throwable t) {
+                    Log.d("Error", t.getMessage());
+                    Toast.makeText(MainActivity.this, "Error Fetching Data!", Toast.LENGTH_SHORT).show();
+
+                }
+            });
+        }catch (Exception e){
+            Log.d("Error", e.getMessage());
+            Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
+        }
     }
-
-
-
 }

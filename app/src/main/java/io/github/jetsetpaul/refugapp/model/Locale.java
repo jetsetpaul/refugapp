@@ -1,6 +1,5 @@
 package io.github.jetsetpaul.refugapp.model;
 
-import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -9,12 +8,39 @@ import com.google.gson.annotations.SerializedName;
 
 public class Locale {
     @SerializedName("name")
-    @Expose
     private String name;
     @SerializedName("country")
-    @Expose
     private  String country;
     @SerializedName("geocoordinates")
-    @Expose
     private String geocoordinates;
+
+    public Locale(String name, String country, String geocoordinates){
+        this.name = name;
+        this.country = country;
+        this.geocoordinates = geocoordinates;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getGeocoordinates() {
+        return geocoordinates;
+    }
+
+    public void setGeocoordinates(String geocoordinates) {
+        this.geocoordinates = geocoordinates;
+    }
 }
