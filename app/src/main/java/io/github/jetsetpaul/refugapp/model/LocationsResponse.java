@@ -10,11 +10,11 @@ import java.util.List;
 
 public class LocationsResponse {
     @SerializedName("records")
-    private List<Locale> locales;
+    private List<RecordContainer> records;
 
-    public List<Locale> getLocales(){return locales;}
 
-    public void setLocales(List<Locale> locales) {
-        this.locales = locales;
-    }
+    public List<RecordContainer> getRecords(){return records;}
+
+    public void setRecords (List<RecordContainer> records){this.records = records;}
+
 }

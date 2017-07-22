@@ -14,6 +14,7 @@ import io.github.jetsetpaul.refugapp.R;
 import io.github.jetsetpaul.refugapp.adapter.LocationsAdapter;
 import io.github.jetsetpaul.refugapp.model.Locale;
 import io.github.jetsetpaul.refugapp.model.LocationsResponse;
+import io.github.jetsetpaul.refugapp.model.RecordContainer;
 import io.github.jetsetpaul.refugapp.rest.AirTableClient;
 import io.github.jetsetpaul.refugapp.rest.AirTableService;
 import retrofit2.Call;
@@ -31,21 +32,24 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        loadJSON();
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
         localeList = new ArrayList<>();
         adapter = new LocationsAdapter(this, localeList);
         recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        recyclerView.setLayoutManager(layoutManager);
         adapter.notifyDataSetChanged();
-        loadJSON();
+
     }
 
     private void loadJSON(){
 
         try{
             if (AIR_TABLE_API_KEY.isEmpty()){
-                Toast.makeText(getApplicationContext(), "Please obtain API Key firstly from airtable.com", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Please obtain API Key first from airtable.com", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -56,8 +60,12 @@ public class MainActivity extends AppCompatActivity {
             call.enqueue(new Callback<LocationsResponse>() {
                 @Override
                 public void onResponse(Call<LocationsResponse> call, Response<LocationsResponse> response) {
-                    List<Locale> locations = response.body().getLocales();
-                    recyclerView.setAdapter(new LocationsAdapter(getApplicationContext(), locations));
+                    List<RecordContainer> records = response.body().getRecords();
+                    for(int i = 0; i< records.size(); i++){
+                        localeList.add(records.get(i).getLocale());
+                    }
+                    response.code();
+                    recyclerView.setAdapter(new LocationsAdapter(getApplicationContext(), localeList));
                     recyclerView.smoothScrollToPosition(0);
                 }
 
@@ -73,4 +81,9 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
         }
     }
+//    HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+//    logging.setLevel(Level.BASIC);
+//    OkHttpClient client = new OkHttpClient.Builder()
+//            .addInterceptor(logging)
+//            .build();
 }

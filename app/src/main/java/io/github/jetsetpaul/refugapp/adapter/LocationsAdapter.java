@@ -2,6 +2,7 @@ package io.github.jetsetpaul.refugapp.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -27,13 +28,18 @@ public class LocationsAdapter extends RecyclerView.Adapter<LocationsAdapter.MyVi
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return null;
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.locations_card, parent, false);
+
+        return new MyViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final LocationsAdapter.MyViewHolder viewHolder, int i) {
-        viewHolder.name.setText(localeList.get(i).getName());
-        viewHolder.country.setText(localeList.get(i).getCountry());
+        String locationName = localeList.get(i).getName();
+        String locationCountry = localeList.get(i).getCountry();
+        viewHolder.name.setText(locationName);
+        viewHolder.country.setText(locationCountry);
 
     }
 

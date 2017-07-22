@@ -10,7 +10,7 @@ import retrofit2.http.Query;
  */
 
 public interface AirTableService {
-    @GET("/Locations")
+    @GET("/v0/appM5n8ocv9GexBFR/Locations")
     Call<LocationsResponse> listLocations(@Query("api_key") String apiKey);
 
 }
